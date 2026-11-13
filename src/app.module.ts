@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { buildDataSourceOptions } from './database/data-source';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { TasksModule } from './modules/tasks/tasks.module';
@@ -40,6 +41,7 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     UsersModule,
     TasksModule,
+    AnalyticsModule,
   ],
   providers: [
     // Orden: rate limit -> autenticación -> roles
