@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import type { CreateUserDto } from './dto/create-user.dto';
 import type { UserFiltersDto } from './dto/user-filters.dto';
@@ -34,5 +38,18 @@ export class UsersService {
   /** Incluye el hash de la contraseña; solo para validar credenciales. */
   findByEmailWithPassword(email: string): Promise<User | null> {
     return this.usersRepository.findByEmailWithPassword(email);
+  }
+
+  /** Devuelve los usuarios pedidos o falla si alguno no existe. */
+  async findByIdsOrFail(ids: number[]): Promise<User[]> {
+    const users = await this.usersRepository.findByIds(ids);
+    const found = new Set(users.map((u) => u.id));
+    const missing = ids.filter((id) => !found.has(id));
+    if (missing.length) {
+      throw new UnprocessableEntityException(
+        `Usuarios inexistentes: ${missing.join(', ')}`,
+      );
+    }
+    return users;
   }
 }

@@ -9,6 +9,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { buildDataSourceOptions } from './database/data-source';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     HealthModule,
     AuthModule,
     UsersModule,
+    TasksModule,
   ],
   providers: [
     // Orden: rate limit -> autenticación -> roles

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { TaskStatus } from '../tasks/entities/task.entity';
 import type { UserFiltersDto } from './dto/user-filters.dto';
 import type { UserWithStatsDto } from './dto/user-response.dto';
@@ -18,6 +18,10 @@ export class UsersRepository {
 
   findById(id: number): Promise<User | null> {
     return this.repo.findOneBy({ id });
+  }
+
+  findByIds(ids: number[]): Promise<User[]> {
+    return ids.length ? this.repo.findBy({ id: In(ids) }) : Promise.resolve([]);
   }
 
   /** Incluye el hash para validar la contraseña en el login. */
