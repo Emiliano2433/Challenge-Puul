@@ -16,6 +16,19 @@ export class UsersRepository {
     return this.repo.save(this.repo.create(data));
   }
 
+  findById(id: number): Promise<User | null> {
+    return this.repo.findOneBy({ id });
+  }
+
+  /** Incluye el hash para validar la contraseña en el login. */
+  findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.repo
+      .createQueryBuilder('u')
+      .addSelect('u.passwordHash')
+      .where('LOWER(u.email) = LOWER(:email)', { email })
+      .getOne();
+  }
+
   existsByEmail(email: string): Promise<boolean> {
     return this.repo
       .createQueryBuilder('u')

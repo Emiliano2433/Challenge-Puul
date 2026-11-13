@@ -26,4 +26,13 @@ export class UsersService {
   list(filters: UserFiltersDto): Promise<UserWithStatsDto[]> {
     return this.usersRepository.listWithStats(filters);
   }
+
+  findById(id: number): Promise<User | null> {
+    return this.usersRepository.findById(id);
+  }
+
+  /** Incluye el hash de la contraseña; solo para validar credenciales. */
+  findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepository.findByEmailWithPassword(email);
+  }
 }
