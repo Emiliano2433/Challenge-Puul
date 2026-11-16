@@ -175,11 +175,14 @@ públicas se marcan con `@Public()`.
 
 ## Tests
 
-Tests end-to-end con Jest y Supertest contra una base de datos aparte (`puul_test`, creada
-automáticamente por `docker compose`):
+- **Unit tests** (`src/**/*.spec.ts`): services con sus repositorios mockeados.
+- **End-to-end** (`test/`): Jest y Supertest contra una base de datos aparte (`puul_test`, creada
+  automáticamente por `docker compose`).
 
 ```bash
-npm test
+npm test              # unit + e2e
+npx jest              # solo unit
+npm run test:e2e      # solo e2e
 ```
 
 ## Scripts útiles
