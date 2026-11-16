@@ -45,9 +45,14 @@ export class UsersRepository {
     const qb = this.repo
       .createQueryBuilder('u')
       .leftJoin('task_assignees', 'ta', 'ta.user_id = u.id')
-      .leftJoin('tasks', 't', 't.id = ta.task_id AND t.status = :done', {
-        done: TaskStatus.DONE,
-      })
+      .leftJoin(
+        'tasks',
+        't',
+        't.id = ta.task_id AND t.status = :done AND t.deleted_at IS NULL',
+        {
+          done: TaskStatus.DONE,
+        },
+      )
       .select([
         'u.id AS id',
         'u.name AS name',

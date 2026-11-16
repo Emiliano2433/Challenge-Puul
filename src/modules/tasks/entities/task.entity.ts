@@ -2,6 +2,7 @@ import {
   Check,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -87,6 +88,10 @@ export class Task {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  /** Soft delete: TypeORM excluye estas filas de las consultas por entidad. */
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz', nullable: true })
+  deletedAt: Date | null;
 
   @ManyToMany(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinTable({

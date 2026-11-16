@@ -24,8 +24,9 @@ export class AnalyticsRepository {
 
   private readonly scoped = `
     SELECT * FROM tasks t
-    WHERE $1::int IS NULL
-       OR EXISTS (SELECT 1 FROM task_assignees ta WHERE ta.task_id = t.id AND ta.user_id = $1)`;
+    WHERE t.deleted_at IS NULL
+      AND ($1::int IS NULL
+       OR EXISTS (SELECT 1 FROM task_assignees ta WHERE ta.task_id = t.id AND ta.user_id = $1))`;
 
   async overview(userId: number | null): Promise<OverviewRow> {
     const [row] = await this.db.query<OverviewRow[]>(
@@ -62,7 +63,7 @@ export class AnalyticsRepository {
                        FILTER (WHERE t.status = 'active'), 0)::float AS "pendingEstimatedHours"
          FROM users u
          LEFT JOIN task_assignees ta ON ta.user_id = u.id
-         LEFT JOIN tasks t ON t.id = ta.task_id
+         LEFT JOIN tasks t ON t.id = ta.task_id AND t.deleted_at IS NULL
         WHERE $1::int IS NULL OR u.id = $1
         GROUP BY u.id
         ORDER BY u.id`,

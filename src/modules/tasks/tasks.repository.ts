@@ -40,8 +40,9 @@ export class TasksRepository {
     return this.repo.create(data);
   }
 
-  async remove(task: Task): Promise<void> {
-    await this.repo.remove(task);
+  /** Soft delete: llena deleted_at en lugar de borrar la fila. */
+  async softDelete(id: number): Promise<void> {
+    await this.repo.softDelete(id);
   }
 
   /** visibleTo = undefined -> cualquier tarea (admin); visibleTo = id -> solo si está asignada. */

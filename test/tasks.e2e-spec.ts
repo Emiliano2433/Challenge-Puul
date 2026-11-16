@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
+import { DataSource } from 'typeorm';
 import { createApp, resetSchema, seedTeam, task, truncate } from './helpers';
 
 describe('Tareas', () => {
@@ -78,6 +79,11 @@ describe('Tareas', () => {
     await http().delete(`/tasks/${t.body.id}`).set(first.auth).expect(403);
     await http().delete(`/tasks/${t.body.id}`).set(admin.auth).expect(204);
     await http().get(`/tasks/${t.body.id}`).set(admin.auth).expect(404);
+    // soft delete: la fila sigue en la BD con deleted_at
+    const [row] = await app
+      .get(DataSource, { strict: false })
+      .query('SELECT deleted_at FROM tasks WHERE id = $1', [t.body.id]);
+    expect(row.deleted_at).not.toBeNull();
   });
 
   it('actualiza cualquier campo y reasigna usuarios', async () => {

@@ -65,7 +65,7 @@ En VS Code también puedes usar **Run and Debug → "API (nest start:debug)"**.
 | GET | `/tasks` | autenticado | Lista tareas, de la más reciente a la menos reciente |
 | GET | `/tasks/:id` | autenticado | Detalle de una tarea |
 | PATCH | `/tasks/:id` | autenticado | Actualiza cualquier campo, incluidas horas y asignados |
-| DELETE | `/tasks/:id` | admin | Elimina una tarea |
+| DELETE | `/tasks/:id` | admin | Elimina una tarea (soft delete con `deletedAt`) |
 | GET | `/analytics` | autenticado | Estadísticas del equipo (o propias si eres miembro) |
 
 ### Tarea
@@ -110,6 +110,8 @@ Ejemplo: `GET /tasks?title=login&userName=miembro&dueFrom=2026-12-01`
 - **Carga de trabajo por usuario** (`workloadByUser`): tareas activas, tareas vencidas y horas
   pendientes estimadas de cada persona, para detectar a quién se está saturando.
 - Además un resumen (`overview`): totales, tareas vencidas y tasa de finalización.
+
+Las tareas eliminadas (soft delete) no cuentan en la analítica ni en las estadísticas de usuarios.
 
 ## Seguridad y permisos
 
