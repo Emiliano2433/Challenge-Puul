@@ -17,7 +17,11 @@ interface EstimationRow {
   over: number;
 }
 
-/** Consultas agregadas en SQL. userId = null -> todo el equipo. */
+/**
+ * Consultas agregadas en SQL. userId = null -> todo el equipo.
+ * `today` (YYYY-MM-DD) llega calculado en la zona horaria de la app, no se usa
+ * CURRENT_DATE porque el servidor corre en UTC.
+ */
 @Injectable()
 export class AnalyticsRepository {
   constructor(@InjectDataSource() private readonly db: DataSource) {}
@@ -28,14 +32,14 @@ export class AnalyticsRepository {
       AND ($1::int IS NULL
        OR EXISTS (SELECT 1 FROM task_assignees ta WHERE ta.task_id = t.id AND ta.user_id = $1))`;
 
-  async overview(userId: number | null): Promise<OverviewRow> {
+  async overview(userId: number | null, today: string): Promise<OverviewRow> {
     const [row] = await this.db.query<OverviewRow[]>(
       `SELECT COUNT(*)::int AS total,
               COUNT(*) FILTER (WHERE status = 'active')::int AS active,
               COUNT(*) FILTER (WHERE status = 'done')::int AS done,
-              COUNT(*) FILTER (WHERE status = 'active' AND due_date < CURRENT_DATE)::int AS overdue
+              COUNT(*) FILTER (WHERE status = 'active' AND due_date < $2::date)::int AS overdue
          FROM (${this.scoped}) s`,
-      [userId],
+      [userId, today],
     );
     return row;
   }
@@ -53,12 +57,12 @@ export class AnalyticsRepository {
     return row;
   }
 
-  workload(userId: number | null): Promise<UserWorkloadDto[]> {
+  workload(userId: number | null, today: string): Promise<UserWorkloadDto[]> {
     return this.db.query<UserWorkloadDto[]>(
       `SELECT u.id AS "userId",
               u.name,
               COUNT(t.id) FILTER (WHERE t.status = 'active')::int AS "activeTasks",
-              COUNT(t.id) FILTER (WHERE t.status = 'active' AND t.due_date < CURRENT_DATE)::int AS "overdueTasks",
+              COUNT(t.id) FILTER (WHERE t.status = 'active' AND t.due_date < $2::date)::int AS "overdueTasks",
               COALESCE(SUM(GREATEST(t.estimated_hours - t.hours_spent, 0))
                        FILTER (WHERE t.status = 'active'), 0)::float AS "pendingEstimatedHours"
          FROM users u
@@ -67,7 +71,7 @@ export class AnalyticsRepository {
         WHERE $1::int IS NULL OR u.id = $1
         GROUP BY u.id
         ORDER BY u.id`,
-      [userId],
+      [userId, today],
     );
   }
 }

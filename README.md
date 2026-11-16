@@ -111,6 +111,8 @@ Ejemplo: `GET /tasks?title=login&userName=miembro&dueFrom=2026-12-01`
   pendientes estimadas de cada persona, para detectar a quién se está saturando.
 - Además un resumen (`overview`): totales, tareas vencidas y tasa de finalización.
 
+Una tarea está vencida si sigue activa y su `dueDate` ya pasó según la fecha local de
+`APP_TIMEZONE` (por defecto `America/Mexico_City`), no la del servidor en UTC.
 Las tareas eliminadas (soft delete) no cuentan en la analítica ni en las estadísticas de usuarios.
 
 ## Seguridad y permisos
