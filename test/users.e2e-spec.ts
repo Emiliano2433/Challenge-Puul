@@ -26,21 +26,21 @@ describe('Usuarios', () => {
       password: 'password123',
     };
 
-    await http().post('/users').set(team.first.auth).send(body).expect(403);
+    await http().post('/v1/users').set(team.first.auth).send(body).expect(403);
     const res = await http()
-      .post('/users')
+      .post('/v1/users')
       .set(team.admin.auth)
       .send(body)
       .expect(201);
     expect(res.body.email).toBe('nuevo@puul.com');
     expect(res.body).not.toHaveProperty('passwordHash');
 
-    await http().post('/users').set(team.admin.auth).send(body).expect(409);
+    await http().post('/v1/users').set(team.admin.auth).send(body).expect(409);
   });
 
   it('valida los datos de entrada', async () => {
     await http()
-      .post('/users')
+      .post('/v1/users')
       .set(team.admin.auth)
       .send({ name: 'X', email: 'no-es-correo', role: 'jefe', password: '123' })
       .expect(400);
@@ -50,7 +50,7 @@ describe('Usuarios', () => {
     const { admin, first, second } = team;
     const create = (cost: number, status: string, assigneeIds: number[]) =>
       http()
-        .post('/tasks')
+        .post('/v1/tasks')
         .set(admin.auth)
         .send(task({ cost, status, assigneeIds }))
         .expect(201);
@@ -59,7 +59,7 @@ describe('Usuarios', () => {
     await create(50.5, 'done', [first.user.id]);
     await create(999, 'active', [first.user.id]);
 
-    const res = await http().get('/users').set(admin.auth).expect(200);
+    const res = await http().get('/v1/users').set(admin.auth).expect(200);
     const byEmail = Object.fromEntries(res.body.map((u: any) => [u.email, u]));
     expect(byEmail['primero@puul.com']).toMatchObject({
       completedTasks: 2,
@@ -75,7 +75,7 @@ describe('Usuarios', () => {
     });
 
     const filtered = await http()
-      .get('/users')
+      .get('/v1/users')
       .query({ role: 'member', name: 'segundo' })
       .set(admin.auth)
       .expect(200);
@@ -84,12 +84,12 @@ describe('Usuarios', () => {
     ]);
 
     const byMail = await http()
-      .get('/users')
+      .get('/v1/users')
       .query({ email: 'PRIMERO' })
       .set(admin.auth)
       .expect(200);
     expect(byMail.body.map((u: any) => u.email)).toEqual(['primero@puul.com']);
 
-    await http().get('/users').set(first.auth).expect(403);
+    await http().get('/v1/users').set(first.auth).expect(403);
   });
 });

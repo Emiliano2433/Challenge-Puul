@@ -20,9 +20,9 @@ describe('Tareas', () => {
   afterAll(() => app.close());
 
   it('pide autenticación', async () => {
-    await http().get('/tasks').expect(401);
+    await http().get('/v1/tasks').expect(401);
     await http()
-      .get('/tasks')
+      .get('/v1/tasks')
       .set({ Authorization: 'Bearer basura' })
       .expect(401);
   });
@@ -31,29 +31,29 @@ describe('Tareas', () => {
     const { admin, first, second } = team;
 
     const own = await http()
-      .post('/tasks')
+      .post('/v1/tasks')
       .set(first.auth)
       .send(task({ title: 'Del primero' }))
       .expect(201);
     expect(own.body.assignees.map((u: any) => u.id)).toEqual([first.user.id]); // se auto-asigna
 
     const other = await http()
-      .post('/tasks')
+      .post('/v1/tasks')
       .set(admin.auth)
       .send(task({ title: 'Del segundo', assigneeIds: [second.user.id] }))
       .expect(201);
 
-    const mine = await http().get('/tasks').set(first.auth).expect(200);
+    const mine = await http().get('/v1/tasks').set(first.auth).expect(200);
     expect(mine.body.map((t: any) => t.title)).toEqual(['Del primero']);
 
-    await http().get(`/tasks/${other.body.id}`).set(first.auth).expect(404);
+    await http().get(`/v1/tasks/${other.body.id}`).set(first.auth).expect(404);
     await http()
-      .patch(`/tasks/${other.body.id}`)
+      .patch(`/v1/tasks/${other.body.id}`)
       .set(first.auth)
       .send({ title: 'x' })
       .expect(404);
 
-    const all = await http().get('/tasks').set(admin.auth).expect(200);
+    const all = await http().get('/v1/tasks').set(admin.auth).expect(200);
     expect(all.body).toHaveLength(2);
   });
 
@@ -61,24 +61,24 @@ describe('Tareas', () => {
     const { admin, first, second } = team;
 
     await http()
-      .post('/tasks')
+      .post('/v1/tasks')
       .set(first.auth)
       .send(task({ assigneeIds: [second.user.id] }))
       .expect(403);
 
     const t = await http()
-      .post('/tasks')
+      .post('/v1/tasks')
       .set(first.auth)
       .send(task())
       .expect(201);
     await http()
-      .patch(`/tasks/${t.body.id}`)
+      .patch(`/v1/tasks/${t.body.id}`)
       .set(first.auth)
       .send({ assigneeIds: [second.user.id] })
       .expect(403);
-    await http().delete(`/tasks/${t.body.id}`).set(first.auth).expect(403);
-    await http().delete(`/tasks/${t.body.id}`).set(admin.auth).expect(204);
-    await http().get(`/tasks/${t.body.id}`).set(admin.auth).expect(404);
+    await http().delete(`/v1/tasks/${t.body.id}`).set(first.auth).expect(403);
+    await http().delete(`/v1/tasks/${t.body.id}`).set(admin.auth).expect(204);
+    await http().get(`/v1/tasks/${t.body.id}`).set(admin.auth).expect(404);
     // soft delete: la fila sigue en la BD con deleted_at
     const [row] = await app
       .get(DataSource, { strict: false })
@@ -89,13 +89,13 @@ describe('Tareas', () => {
   it('actualiza cualquier campo y reasigna usuarios', async () => {
     const { admin, first, second } = team;
     const t = await http()
-      .post('/tasks')
+      .post('/v1/tasks')
       .set(admin.auth)
       .send(task({ assigneeIds: [first.user.id] }))
       .expect(201);
 
     const res = await http()
-      .patch(`/tasks/${t.body.id}`)
+      .patch(`/v1/tasks/${t.body.id}`)
       .set(admin.auth)
       .send({
         estimatedHours: 8.5,
@@ -111,19 +111,19 @@ describe('Tareas', () => {
 
     // el miembro puede registrar horas en su propia tarea
     const hours = await http()
-      .patch(`/tasks/${t.body.id}`)
+      .patch(`/v1/tasks/${t.body.id}`)
       .set(first.auth)
       .send({ hoursSpent: 4 })
       .expect(200);
     expect(hours.body.hoursSpent).toBe(4);
 
     await http()
-      .patch(`/tasks/${t.body.id}`)
+      .patch(`/v1/tasks/${t.body.id}`)
       .set(admin.auth)
       .send({ assigneeIds: [999] })
       .expect(422);
     await http()
-      .patch(`/tasks/${t.body.id}`)
+      .patch(`/v1/tasks/${t.body.id}`)
       .set(admin.auth)
       .send({ cost: -5 })
       .expect(400);
@@ -133,7 +133,7 @@ describe('Tareas', () => {
     const { admin, first, second } = team;
     const create = (title: string, dueDate: string, assigneeIds: number[]) =>
       http()
-        .post('/tasks')
+        .post('/v1/tasks')
         .set(admin.auth)
         .send(task({ title, dueDate, assigneeIds }))
         .expect(201);
@@ -144,7 +144,7 @@ describe('Tareas', () => {
 
     const titles = async (query: Record<string, unknown>) =>
       (
-        await http().get('/tasks').query(query).set(admin.auth).expect(200)
+        await http().get('/v1/tasks').query(query).set(admin.auth).expect(200)
       ).body.map((t: any) => t.title);
 
     expect(await titles({})).toEqual(['Deploy', 'API login', 'Diseño login']);
@@ -181,7 +181,7 @@ describe('Tareas', () => {
     expect(await titles({ limit: 1, offset: 1 })).toEqual(['API login']);
 
     await http()
-      .get('/tasks')
+      .get('/v1/tasks')
       .query({ dueFrom: '2030-02-01', dueTo: '2030-01-01' })
       .set(admin.auth)
       .expect(400);

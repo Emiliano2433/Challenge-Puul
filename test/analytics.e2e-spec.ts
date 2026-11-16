@@ -22,7 +22,7 @@ describe('Analítica', () => {
     const { admin, first, second } = team;
     const create = (data: Record<string, unknown>) =>
       http()
-        .post('/tasks')
+        .post('/v1/tasks')
         .set(admin.auth)
         .send(
           task({
@@ -51,7 +51,10 @@ describe('Analítica', () => {
       assigneeIds: [first.user.id],
     }); // vencida
 
-    const { body } = await http().get('/analytics').set(admin.auth).expect(200);
+    const { body } = await http()
+      .get('/v1/analytics')
+      .set(admin.auth)
+      .expect(200);
     expect(body.overview).toEqual({
       totalTasks: 3,
       activeTasks: 1,
@@ -75,7 +78,7 @@ describe('Analítica', () => {
       pendingEstimatedHours: 6,
     });
 
-    const mine = await http().get('/analytics').set(first.auth).expect(200);
+    const mine = await http().get('/v1/analytics').set(first.auth).expect(200);
     expect(mine.body.overview.totalTasks).toBe(2);
     expect(mine.body.workloadByUser.map((w: any) => w.userId)).toEqual([
       first.user.id,

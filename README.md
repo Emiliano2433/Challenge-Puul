@@ -49,7 +49,7 @@ En VS Code también puedes usar **Run and Debug → "API (nest start:debug)"**.
 
 ### Autenticación
 
-1. `POST /auth/login` con `{"email": "...", "password": "..."}` devuelve un `accessToken`.
+1. `POST /v1/auth/login` con `{"email": "...", "password": "..."}` devuelve un `accessToken`.
 2. Envía el token en cada petición: `Authorization: Bearer <token>`.
    En Swagger usa el botón **Authorize**.
 
@@ -57,16 +57,16 @@ En VS Code también puedes usar **Run and Debug → "API (nest start:debug)"**.
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
-| POST | `/auth/login` | público | Inicia sesión y devuelve un JWT |
-| GET | `/auth/me` | autenticado | Usuario actual |
-| POST | `/users` | admin | Crea un usuario (nombre, correo, rol `member`/`admin`, contraseña) |
-| GET | `/users` | admin | Lista usuarios con `completedTasks` y `completedTasksCost`. Filtros: `name`, `email`, `role` |
-| POST | `/tasks` | autenticado | Crea una tarea |
-| GET | `/tasks` | autenticado | Lista tareas, de la más reciente a la menos reciente |
-| GET | `/tasks/:id` | autenticado | Detalle de una tarea |
-| PATCH | `/tasks/:id` | autenticado | Actualiza cualquier campo, incluidas horas y asignados |
-| DELETE | `/tasks/:id` | admin | Elimina una tarea (soft delete con `deletedAt`) |
-| GET | `/analytics` | autenticado | Estadísticas del equipo (o propias si eres miembro) |
+| POST | `/v1/auth/login` | público | Inicia sesión y devuelve un JWT |
+| GET | `/v1/auth/me` | autenticado | Usuario actual |
+| POST | `/v1/users` | admin | Crea un usuario (nombre, correo, rol `member`/`admin`, contraseña) |
+| GET | `/v1/users` | admin | Lista usuarios con `completedTasks` y `completedTasksCost`. Filtros: `name`, `email`, `role` |
+| POST | `/v1/tasks` | autenticado | Crea una tarea |
+| GET | `/v1/tasks` | autenticado | Lista tareas, de la más reciente a la menos reciente |
+| GET | `/v1/tasks/:id` | autenticado | Detalle de una tarea |
+| PATCH | `/v1/tasks/:id` | autenticado | Actualiza cualquier campo, incluidas horas y asignados |
+| DELETE | `/v1/tasks/:id` | admin | Elimina una tarea (soft delete con `deletedAt`) |
+| GET | `/v1/analytics` | autenticado | Estadísticas del equipo (o propias si eres miembro) |
 
 ### Tarea
 
@@ -85,7 +85,7 @@ En VS Code también puedes usar **Run and Debug → "API (nest start:debug)"**.
 
 `status` puede ser `active` o `done`. `hoursSpent` sirve para registrar el tiempo invertido.
 
-### Filtros de `GET /tasks` (se pueden combinar)
+### Filtros de `GET /v1/tasks` (se pueden combinar)
 
 | Parámetro | Ejemplo | Descripción |
 |---|---|---|
@@ -98,11 +98,11 @@ En VS Code también puedes usar **Run and Debug → "API (nest start:debug)"**.
 | `userEmail` | `@puul.com` | Correo parcial de algún asignado |
 | `limit` / `offset` | `20` / `40` | Paginación (máx. 200) |
 
-Ejemplo: `GET /tasks?title=login&userName=miembro&dueFrom=2026-12-01`
+Ejemplo: `GET /v1/tasks?title=login&userName=miembro&dueFrom=2026-12-01`
 
 ### Analítica
 
-`GET /analytics` devuelve:
+`GET /v1/analytics` devuelve:
 
 - **Precisión de estimación** (`estimationAccuracy`): en tareas terminadas, horas estimadas vs.
   horas reales, la razón entre ambas (1 = estimación perfecta; >1 = el equipo subestima) y
@@ -126,11 +126,11 @@ Las tareas eliminadas (soft delete) no cuentan en la analítica ni en las estad�
 
   | Endpoint | Límite |
   |---|---|
-  | `POST /auth/login` | 5 / minuto |
-  | `POST /users` | 10 / minuto |
-  | `DELETE /tasks/:id` | 10 / minuto |
-  | `POST /tasks` | 30 / minuto |
-  | `PATCH /tasks/:id` | 60 / minuto |
+  | `POST /v1/auth/login` | 5 / minuto |
+  | `POST /v1/users` | 10 / minuto |
+  | `DELETE /v1/tasks/:id` | 10 / minuto |
+  | `POST /v1/tasks` | 30 / minuto |
+  | `PATCH /v1/tasks/:id` | 60 / minuto |
   | resto | 120 / minuto |
 
 - Contraseñas con bcrypt; tokens JWT con expiración configurable (`JWT_EXPIRES_IN`).

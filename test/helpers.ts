@@ -56,7 +56,7 @@ export async function makeUser(
     }),
   );
   const res = await request(app.getHttpServer())
-    .post('/auth/login')
+    .post('/v1/auth/login')
     .send({ email, password: PASSWORD })
     .expect(200);
   return { user, auth: { Authorization: `Bearer ${res.body.accessToken}` } };

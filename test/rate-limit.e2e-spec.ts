@@ -21,7 +21,7 @@ describe('Rate limiting', () => {
     const codes: number[] = [];
     for (let i = 0; i < 6; i++) {
       codes.push(
-        (await request(app.getHttpServer()).post('/auth/login').send(body))
+        (await request(app.getHttpServer()).post('/v1/auth/login').send(body))
           .status,
       );
     }
